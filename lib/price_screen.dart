@@ -9,7 +9,8 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  String selectedCurrecy = 'USD';
+  //L2- 6: Update the default currency to AUD, the first item in the currencyList.
+  String selectedCurrecy = 'AUD';
 
   DropdownButton<String> androidDropdown() {
     List<DropdownMenuItem<String>> dropdownItems = [];
@@ -24,6 +25,8 @@ class _PriceScreenState extends State<PriceScreen> {
       onChanged: (value) {
         setState(() {
           selectedCurrecy = value!;
+          //L2 -2: Call getData() when the picker/dropdown changes.
+          getData();
         });
       },
     );
@@ -38,7 +41,12 @@ class _PriceScreenState extends State<PriceScreen> {
     return CupertinoPicker(
         itemExtent: 32.0,
         onSelectedItemChanged: (selectedIndex) {
-          print(selectedIndex);
+          setState(() {
+            //L2 -1: Save the selected currency to the property selectedCurrency
+            selectedCurrecy = currenciesList[selectedIndex];
+            //L2 -2: Call getData() when the picker/dropdown changes.
+            getData();
+          });
         },
         children: pickerItems);
   }
@@ -55,14 +63,19 @@ class _PriceScreenState extends State<PriceScreen> {
   //   }
   // }
 
-  String bitcoinValueInUSD = '?';
-  //TODO: Create a method here called getData() to get the coin data from coin_data.dart
+  double bitcoinValue = 0;
+  double ETHvalue = 0;
+  double LTCvalue = 0;
+  //L1: Create a method here called getData() to get the coin data from coin_data.dart
   void getData() async {
     CoinData coindata = CoinData();
     try {
-      double data = await coindata.getCoinData();
+      Map data = await coindata.getCoinData(selectedCurrecy);
       setState(() {
-        bitcoinValueInUSD = data.toStringAsFixed(0);
+        ////////////////////////////
+        bitcoinValue = (data["BTC"]);
+        ETHvalue = (data["ETH"]);
+        LTCvalue = (data["LTC"]);
       });
     } catch (e) {
       print(e);
@@ -72,7 +85,7 @@ class _PriceScreenState extends State<PriceScreen> {
   @override
   void initState() {
     super.initState();
-    //TODO: Call getData() when the screen loads up.
+    //L1: Call getData() when the screen loads up.
     getData();
   }
 
@@ -80,34 +93,28 @@ class _PriceScreenState extends State<PriceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('🤑 Coin Ticker'),
+        title: const Center(child: Text('🤑 Coin Ticker')),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  //TODO: Update the Text Widget with the live bitcoin data here.
-                  '1 BTC = ${bitcoinValueInUSD} USD',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              CryptoCard(
+                  cryptoCurrency: "BTC",
+                  value: bitcoinValue.toStringAsFixed(0),
+                  selectedCurrecy: selectedCurrecy),
+              CryptoCard(
+                  cryptoCurrency: "ETH",
+                  value: ETHvalue.toStringAsFixed(0),
+                  selectedCurrecy: selectedCurrecy),
+              CryptoCard(
+                  cryptoCurrency: "LTC",
+                  value: LTCvalue.toStringAsFixed(0),
+                  selectedCurrecy: selectedCurrecy),
+            ],
           ),
           Container(
             height: 150.0,
@@ -117,6 +124,46 @@ class _PriceScreenState extends State<PriceScreen> {
             child: Platform.isIOS ? IOSPicker() : androidDropdown(),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class CryptoCard extends StatelessWidget {
+  const CryptoCard(
+      {Key? key,
+      required this.value,
+      required this.selectedCurrecy,
+      required this.cryptoCurrency})
+      : super(key: key);
+
+  final String value;
+  final String selectedCurrecy;
+  final String cryptoCurrency;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(18.0, 4.0, 18.0, 0),
+      child: Card(
+        color: Colors.lightBlueAccent,
+        elevation: 5.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+          child: Text(
+            //L1: Update the Text Widget with the live bitcoin data here.
+            //L2 -5: Update the currency name depending on the selectedCurrency.
+            '1 $cryptoCurrency = ${value} $selectedCurrecy',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 20.0,
+              color: Colors.white,
+            ),
+          ),
+        ),
       ),
     );
   }
