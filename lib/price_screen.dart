@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'coin_data.dart';
 import 'package:flutter/cupertino.dart';
+import 'dart:io' show Platform; //for checting platform IOS/Android
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -10,23 +11,49 @@ class PriceScreen extends StatefulWidget {
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrecy = 'USD';
 
-  List<DropdownMenuItem<String>> getDropdownItems() {
+  DropdownButton<String> androidDropdown() {
     List<DropdownMenuItem<String>> dropdownItems = [];
     for (String currency in currenciesList) {
       var newItem = DropdownMenuItem(child: Text(currency), value: currency);
       dropdownItems.add(newItem);
     }
-    return dropdownItems;
+
+    return DropdownButton<String>(
+      value: selectedCurrecy,
+      items: dropdownItems,
+      onChanged: (value) {
+        setState(() {
+          selectedCurrecy = value!;
+        });
+      },
+    );
   }
 
-  List<Text> getPickerItems() {
+  CupertinoPicker IOSPicker() {
     List<Text> pickerItems = [];
     for (var currency in currenciesList) {
       var item = Text(currency);
       pickerItems.add(item);
     }
-    return pickerItems;
+    return CupertinoPicker(
+        itemExtent: 32.0,
+        onSelectedItemChanged: (selectedIndex) {
+          print(selectedIndex);
+        },
+        children: pickerItems);
   }
+
+  // instead of this method you can use ternory operator where you use
+  // Widget getPicker() {
+  //   if (Platform.isIOS) {
+  //     return IOSPicker();
+  //   } else if (Platform.isAndroid) {
+  //     return androidDropdown();
+  //   } else {
+  //     // else if it not IOS or Android
+  //     return androidDropdown();
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -64,26 +91,10 @@ class _PriceScreenState extends State<PriceScreen> {
             alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30.0),
             color: Colors.lightBlue,
-            child: CupertinoPicker(
-                itemExtent: 32.0,
-                onSelectedItemChanged: (selectedIndex) {
-                  print(selectedIndex);
-                },
-                children: getPickerItems()),
+            child: Platform.isIOS ? IOSPicker() : androidDropdown(),
           ),
         ],
       ),
     );
   }
 }
-
-
-// DropdownButton<String>(
-//               value: selectedCurrecy,
-//               items: getDropdownItems(),
-//               onChanged: (value) {
-//                 setState(() {
-//                   selectedCurrecy = value!;
-//                 });
-//               },
-//             )
