@@ -66,11 +66,15 @@ class _PriceScreenState extends State<PriceScreen> {
   double bitcoinValue = 0;
   double ETHvalue = 0;
   double LTCvalue = 0;
+
+  bool isWaiting = false;
   //L1: Create a method here called getData() to get the coin data from coin_data.dart
   void getData() async {
+    isWaiting = true;
     CoinData coindata = CoinData();
     try {
       Map data = await coindata.getCoinData(selectedCurrecy);
+      isWaiting = false;
       setState(() {
         ////////////////////////////
         bitcoinValue = (data["BTC"]);
@@ -104,15 +108,15 @@ class _PriceScreenState extends State<PriceScreen> {
             children: [
               CryptoCard(
                   cryptoCurrency: "BTC",
-                  value: bitcoinValue.toStringAsFixed(0),
+                  value: isWaiting ? '?' : bitcoinValue.toStringAsFixed(0),
                   selectedCurrecy: selectedCurrecy),
               CryptoCard(
                   cryptoCurrency: "ETH",
-                  value: ETHvalue.toStringAsFixed(0),
+                  value: isWaiting ? '?' : ETHvalue.toStringAsFixed(0),
                   selectedCurrecy: selectedCurrecy),
               CryptoCard(
                   cryptoCurrency: "LTC",
-                  value: LTCvalue.toStringAsFixed(0),
+                  value: isWaiting ? '?' : LTCvalue.toStringAsFixed(0),
                   selectedCurrecy: selectedCurrecy),
             ],
           ),

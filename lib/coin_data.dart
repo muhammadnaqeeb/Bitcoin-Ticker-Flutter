@@ -33,7 +33,7 @@ const List<String> cryptoList = [
 // https://rest.coinapi.io/v1/exchangerate/BTC/USD?apikey=
 const coinAPIURL = 'https://rest.coinapi.io/v1/exchangerate';
 const apiKey = '053CC058-24BC-476D-862F-5BD56DEBE5E4';
-Map result = {};
+Map cryptoPrices = {};
 
 class CoinData {
   //L1: Create your getCoinData() method here.
@@ -46,7 +46,7 @@ class CoinData {
           '$coinAPIURL/$crypto/$selectedCurrency?apikey=053CC058-24BC-476D-862F-5BD56DEBE5E4'));
       if (response.statusCode == 200) {
         String data = response.body;
-        result[crypto] = jsonDecode(data)['rate'];
+        cryptoPrices[crypto] = jsonDecode(data)['rate'];
       } else {
         print(response.statusCode);
 
@@ -54,6 +54,6 @@ class CoinData {
         throw 'Problem with the get request';
       }
     }
-    return result;
+    return cryptoPrices;
   }
 }
